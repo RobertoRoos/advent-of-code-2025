@@ -33,8 +33,7 @@ fn main() {
     let args = Args::parse();
 
     // Instantiate the solver for the selected day
-    let solver: Box<dyn Solution>;
-    solver = match args.day {
+    let solver: Box<dyn Solution> = match args.day {
         1 => Box::new(Day01 {}),
         2 => Box::new(Day02 {}),
         _ => panic!("Invalid number for <day>"), // Also covered by CLI validator
