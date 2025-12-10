@@ -2,7 +2,7 @@ mod days;
 mod shared;
 
 use clap::Parser;
-use std::path::PathBuf;
+use std::{path, path::PathBuf};
 
 use days::{Day01, Day02};
 use shared::Solution;
@@ -18,6 +18,7 @@ struct Args {
     day: u8,
 
     /// Path to the input.txt file
+    #[arg(short, long, default_value = "default")]
     input: PathBuf,
 
     /// Enable printing of the timing statistic
@@ -32,9 +33,21 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
+    // Resolve input path
+    let input_file: PathBuf = if args.input.to_str() == Some("default") {
+        PathBuf::from(format!("./inputs/day_{:02}.txt", args.day))
+    } else {
+        args.input
+    };
+    let input_file = path::absolute(&input_file).expect("Invalid path");
+
+    if !input_file.is_file() {
+        panic!("Could not find input file: {}", input_file.display());
+    }
+
     // Instantiate the solver for the selected day
     let solver: Box<dyn Solution> = match args.day {
-        1 => Box::new(Day01 {}),
+        1 => Box::new(Day01::new(input_file)),
         2 => Box::new(Day02 {}),
         _ => panic!("Invalid number for <day>"), // Also covered by CLI validator
     };
