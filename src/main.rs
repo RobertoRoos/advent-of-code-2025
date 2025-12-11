@@ -2,10 +2,9 @@ mod days;
 mod shared;
 
 use clap::Parser;
-use std::{path, path::PathBuf};
-use std::error::Error;
 use days::{Day01, Day02};
 use shared::Solution;
+use std::{path, path::PathBuf};
 
 /// Advent of code 2025 solutions
 ///
@@ -30,7 +29,7 @@ struct Args {
     debug: bool,
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() {
     let args = Args::parse();
 
     // Resolve input path
@@ -39,7 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     } else {
         args.input
     };
-    let input_file = path::absolute(&input_file)?;
+    let input_file = path::absolute(&input_file).unwrap();
 
     // Instantiate the solver for the selected day
     let solver: Box<dyn Solution> = match args.day {
@@ -48,9 +47,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         _ => panic!("Invalid number for <day>"), // Also covered by CLI validator
     };
 
-    let result = solver.run()?;
+    let result = solver.run();
 
     println!("{}", result);
-
-    Ok(())
 }
