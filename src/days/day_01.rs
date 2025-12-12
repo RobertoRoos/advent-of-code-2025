@@ -1,4 +1,4 @@
-use crate::shared::{Outcome, Solution, Part};
+use crate::shared::{Outcome, Solution};
 
 use std::io::BufRead;
 use std::path::PathBuf;
@@ -20,8 +20,8 @@ impl Day01 {
 }
 
 impl Solution for Day01 {
-    /// Main method to get the solution
-    fn run(&self, input_file: PathBuf, _part: Part) -> Outcome {
+    /// Part 1 solution
+    fn run_part_1(&self, input_file: PathBuf) -> Outcome {
         let mut zeros_count = 0;
 
         self.get_file_reader(input_file)
@@ -36,6 +36,11 @@ impl Solution for Day01 {
             });
 
         Outcome::Number(zeros_count)
+    }
+
+    /// Part 2 solution
+    fn run_part_2(&self, _input_file: PathBuf) -> Outcome {
+        Outcome::Text(String::from("day 1 - part 2"))
     }
 }
 
@@ -52,7 +57,7 @@ mod tests {
     #[test]
     fn sample() {
         let solver = Day01;
-        let result = solver.run(PathBuf::from("tests/day_01/sample.txt"));
+        let result = solver.run_part_1(PathBuf::from("tests/day_01/sample.txt"));
         assert_eq!(result, Outcome::Number(3));
     }
 }

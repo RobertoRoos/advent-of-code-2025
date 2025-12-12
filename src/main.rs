@@ -1,7 +1,7 @@
 mod days;
 mod shared;
 
-use crate::shared::{Outcome, Part};
+use crate::shared::Outcome;
 use clap::Parser;
 use days::get_solver;
 use std::{path, path::PathBuf};
@@ -47,9 +47,7 @@ fn main() {
     // Instantiate the solver for the selected day
     let solver = get_solver(args.day);
 
-    let part = Part::try_from(args.part).unwrap();
-    
-    let result = solver.run(input_file, part);
+    let result = solver.run(input_file, args.part);
 
     match result {
         Outcome::Number(n) => println!("{}", n),

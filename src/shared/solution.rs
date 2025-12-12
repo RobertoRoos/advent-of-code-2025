@@ -9,29 +9,29 @@ pub enum Outcome {
     Text(String),
 }
 
-/// Which part of the day
-#[derive(PartialEq, Debug)]
-pub enum Part {
-    Part1,
-    Part2,
-}
-
-impl TryFrom<u8> for Part {
-    type Error = ();
-
-    fn try_from(v: u8) -> Result<Self, Self::Error> {
-        match v {
-            1 => Ok(Part::Part1),
-            2 => Ok(Part::Part2),
-            _ => Err(()),
-        }
-    }
-}
-
 /// Base behavior of the daily solutions
 pub trait Solution {
-    fn run(&self, input_file: PathBuf, part: Part) -> Outcome;
+    /// Helper initialize method - default implementation is empty
+    fn init(&self) {}
 
+    /// Main run method, it just picks the right solution method
+    fn run(&self, input_file: PathBuf, part: u8) -> Outcome {
+        self.init(); // Helper for future implementations for shared logic across parts
+
+        match part {
+            1 => self.run_part_1(input_file),
+            2 => self.run_part_2(input_file),
+            _ => panic!("Cannot do anything with part {}", part), // Also validated by CLI
+        }
+    }
+
+    /// Solution for part 1 (must be implemented)
+    fn run_part_1(&self, input_file: PathBuf) -> Outcome;
+
+    /// Solution for part 2 (must be implemented)
+    fn run_part_2(&self, input_file: PathBuf) -> Outcome;
+
+    /// Create a reader object for the input file
     fn get_file_reader(&self, input_file: PathBuf) -> BufReader<File> {
         let file = File::open(input_file).unwrap();
         BufReader::new(file)

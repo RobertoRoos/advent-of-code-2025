@@ -1,3 +1,3 @@
 mod solution;
 
-pub use solution::{Outcome, Solution, Part};
+pub use solution::{Outcome, Solution};
