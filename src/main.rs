@@ -1,9 +1,9 @@
 mod days;
 mod shared;
 
+use crate::shared::Outcome;
 use clap::Parser;
-use days::{Day01, Day02};
-use shared::Solution;
+use days::get_solver;
 use std::{path, path::PathBuf};
 
 /// Advent of code 2025 solutions
@@ -41,13 +41,12 @@ fn main() {
     let input_file = path::absolute(&input_file).unwrap();
 
     // Instantiate the solver for the selected day
-    let solver: Box<dyn Solution> = match args.day {
-        1 => Box::new(Day01 {}),
-        2 => Box::new(Day02 {}),
-        _ => panic!("Invalid number for <day>"), // Also covered by CLI validator
-    };
+    let solver = get_solver(args.day);
 
     let result = solver.run(input_file);
 
-    println!("{}", result);
+    match result {
+        Outcome::Number(n) => println!("{}", n),
+        Outcome::Text(t) => println!("{}", t),
+    }
 }

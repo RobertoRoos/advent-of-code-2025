@@ -1,8 +1,9 @@
-use crate::shared::Solution;
+use crate::shared::{Outcome, Solution};
 
 use std::io::BufRead;
 use std::path::PathBuf;
 
+/// Solver for day 1
 pub struct Day01;
 
 impl Day01 {
@@ -20,7 +21,7 @@ impl Day01 {
 
 impl Solution for Day01 {
     /// Main method to get the solution
-    fn run(&self, input_file: PathBuf) -> String {
+    fn run(&self, input_file: PathBuf) -> Outcome {
         let mut zeros_count = 0;
 
         self.get_file_reader(input_file)
@@ -34,6 +35,24 @@ impl Solution for Day01 {
                 next
             });
 
-        format!("{}", zeros_count)
+        Outcome::Number(zeros_count)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn step_to_number() {
+        assert_eq!(Day01::step_to_number("R4"), 4);
+        assert_eq!(Day01::step_to_number("L11"), -11);
+    }
+
+    #[test]
+    fn sample() {
+        let solver = Day01;
+        let result = solver.run(PathBuf::from("tests/day_01/sample.txt"));
+        assert_eq!(result, Outcome::Number(3));
     }
 }
