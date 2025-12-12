@@ -4,7 +4,7 @@ mod shared;
 use crate::shared::Outcome;
 use clap::Parser;
 use days::get_solver;
-use std::{path, path::PathBuf};
+use std::{path, path::PathBuf, time::Instant};
 
 /// Advent of code 2025 solutions
 ///
@@ -44,10 +44,21 @@ fn main() {
     };
     let input_file = path::absolute(&input_file).unwrap();
 
+    let time_start = if args.timing {
+        Some(Instant::now())
+    } else {
+        None
+    };
+
     // Instantiate the solver for the selected day
     let solver = get_solver(args.day);
 
     let result = solver.run(input_file, args.part);
+
+    if let Some(time_start) = time_start {
+        let elapsed = time_start.elapsed();
+        eprintln!("Computation time: {:.4} ms", elapsed.as_secs_f32() * 1.0e3);
+    }
 
     match result {
         Outcome::Number(n) => println!("{}", n),
