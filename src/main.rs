@@ -1,7 +1,7 @@
 mod days;
 mod shared;
 
-use crate::shared::Outcome;
+use crate::shared::{Outcome, Part};
 use clap::Parser;
 use days::get_solver;
 use std::{path, path::PathBuf};
@@ -19,6 +19,10 @@ struct Args {
     /// Path to the input.txt file
     #[arg(short, long, default_value = "default")]
     input: PathBuf,
+
+    /// Whether to run part 1 or part 2
+    #[arg(short, long, default_value = "1", value_parser=clap::value_parser!(u8).range(1..=2))]
+    part: u8,
 
     /// Enable printing of the timing statistic
     #[arg(short, long, default_value = "false")]
@@ -43,7 +47,9 @@ fn main() {
     // Instantiate the solver for the selected day
     let solver = get_solver(args.day);
 
-    let result = solver.run(input_file);
+    let part = Part::try_from(args.part).unwrap();
+    
+    let result = solver.run(input_file, part);
 
     match result {
         Outcome::Number(n) => println!("{}", n),

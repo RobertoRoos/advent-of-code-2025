@@ -1,4 +1,4 @@
-use crate::shared::{Outcome, Solution};
+use crate::shared::{Outcome, Solution, Part};
 
 use std::io::BufRead;
 use std::path::PathBuf;
@@ -21,7 +21,7 @@ impl Day01 {
 
 impl Solution for Day01 {
     /// Main method to get the solution
-    fn run(&self, input_file: PathBuf) -> Outcome {
+    fn run(&self, input_file: PathBuf, _part: Part) -> Outcome {
         let mut zeros_count = 0;
 
         self.get_file_reader(input_file)

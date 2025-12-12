@@ -8,7 +8,7 @@ This is my solutions to the [advent of code 2025](https://adventofcode.com/2025)
 After building, run it like:
 
 ```shell
-advent-of-code-2025 <day-number> [--input <path-to-input.txt>]
+advent-of-code-2025 <day-number> [--input <path-to-input.txt>] [--part <1,2>]
 ```
 
 To view all available options, check:
@@ -17,3 +17,4 @@ advent-of-code-2025 --help
 ```
 
 If `--input` is omitted, than inputs will be loaded automatically in `inputs/day_<nn>.txt`.
+Similarly, `--part` will simply default to part 1.
