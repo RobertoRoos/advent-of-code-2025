@@ -61,7 +61,7 @@ impl Solution for Day01 {
                 next
             });
 
-        Outcome::Number(zeros_count)
+        Outcome::I32(zeros_count)
     }
 
     /// Part 2 solution
@@ -75,7 +75,7 @@ impl Solution for Day01 {
                     let (next_code, extra_zeros) = Self::wrap_step(code, step);
                     (next_code, zeros + extra_zeros)
                 });
-        Outcome::Number(zeros)
+        Outcome::I32(zeros)
     }
 }
 
@@ -93,7 +93,7 @@ mod tests {
     fn part_1_sample() {
         let solver = Day01 {};
         let result = solver.run_part_1(PathBuf::from("tests/day_01/sample.txt"));
-        assert_eq!(result, Outcome::Number(3));
+        assert_eq!(result, Outcome::I32(3));
     }
 
     #[test]
@@ -130,6 +130,6 @@ mod tests {
     fn part_2_sample() {
         let solver = Day01 {};
         let result = solver.run_part_2(PathBuf::from("tests/day_01/sample.txt"));
-        assert_eq!(result, Outcome::Number(6));
+        assert_eq!(result, Outcome::I32(6));
     }
 }

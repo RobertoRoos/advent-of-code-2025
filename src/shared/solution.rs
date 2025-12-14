@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
@@ -5,8 +6,20 @@ use std::path::PathBuf;
 /// Possible outcomes for a daily solver (either a number or a string directly)
 #[derive(PartialEq, Debug)]
 pub enum Outcome {
-    Number(i32),
+    I32(i32),
+    U64(u64),
     Text(String),
+}
+
+/// Implement string conversion for our general `Outcome` enum
+impl Display for Outcome {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+        match self {
+            Outcome::I32(n) => write!(f, "{}", n),
+            Outcome::U64(n) => write!(f, "{}", n),
+            Outcome::Text(txt) => write!(f, "{}", txt),
+        }
+    }
 }
 
 /// Base behavior of the daily solutions

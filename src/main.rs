@@ -1,7 +1,6 @@
 mod days;
 mod shared;
 
-use crate::shared::Outcome;
 use clap::Parser;
 use days::get_solver;
 use std::{path, path::PathBuf, time::Instant};
@@ -60,8 +59,5 @@ fn main() {
         eprintln!("Computation time: {:.4} ms", elapsed.as_secs_f32() * 1.0e3);
     }
 
-    match result {
-        Outcome::Number(n) => println!("{}", n),
-        Outcome::Text(t) => println!("{}", t),
-    }
+    println!("{}", result);
 }
