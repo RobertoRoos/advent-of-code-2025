@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 /// Possible outcomes for a daily solver (either a number or a string directly)
 #[derive(PartialEq, Debug)]
+#[allow(dead_code)]
 pub enum Outcome {
     I32(i32),
     U64(u64),
