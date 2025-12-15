@@ -19,7 +19,7 @@ impl Day02 {
         let func = if only_two {
             |(from, to)| Self::sum_invalid_ids_doubles(from, to)
         } else {
-            panic!("Yet to be implemented!")
+            |(from, to)| Self::sum_invalid_ids_any(from, to)
         };
 
         let sum: u64 = first_line
@@ -83,6 +83,31 @@ impl Day02 {
         }
         sum
     }
+
+    fn is_invalid_id_any(code: u64) -> bool {
+        let code_str = format!("{}", code);
+
+        // Check possible grouping sizes one after the other
+        for group_size in 1..=(code_str.len() / 2) {
+            let num_groups = code_str.len() / group_size;
+            if num_groups * group_size != code_str.len() {
+                continue; // Could not be a multiple of this group
+            }
+
+            let test_str = code_str[..group_size].repeat(num_groups);
+            if test_str == code_str {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// In a provided product range, sum the invalid ids (any duplicate groups)
+    fn sum_invalid_ids_any(from: u64, to: u64) -> u64 {
+        (from..=to)
+            .filter(|&code| Self::is_invalid_id_any(code))
+            .sum()
+    }
 }
 
 impl Solution for Day02 {
@@ -96,6 +121,7 @@ impl Solution for Day02 {
 }
 
 #[cfg(test)]
+#[allow(clippy::bool_assert_comparison)]
 mod tests {
     use super::*;
 
@@ -125,10 +151,21 @@ mod tests {
         assert_eq!(result, Outcome::U64(1227775554));
     }
 
-    // #[test]
-    // fn part_2_sample() {
-    //     let solver = Day02 {};
-    //     let result = solver.run_part_2(PathBuf::from("tests/day_02/sample.txt"));
-    //     assert_eq!(result, Outcome::U64(4174379265));
-    // }
+    #[test]
+    fn is_invalid_id_any() {
+        assert_eq!(Day02::is_invalid_id_any(11), true);
+        assert_eq!(Day02::is_invalid_id_any(111), true);
+        assert_eq!(Day02::is_invalid_id_any(12), false);
+        assert_eq!(Day02::is_invalid_id_any(1112), false);
+        assert_eq!(Day02::is_invalid_id_any(1212), true);
+        assert_eq!(Day02::is_invalid_id_any(123123123), true);
+        assert_eq!(Day02::is_invalid_id_any(123123124), false);
+    }
+
+    #[test]
+    fn part_2_sample() {
+        let solver = Day02 {};
+        let result = solver.run_part_2(PathBuf::from("tests/day_02/sample.txt"));
+        assert_eq!(result, Outcome::U64(4174379265));
+    }
 }
