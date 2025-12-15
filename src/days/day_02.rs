@@ -1,4 +1,5 @@
 use crate::shared::{Outcome, Solution};
+use std::collections::HashSet;
 use std::io::BufRead;
 use std::path::PathBuf;
 
@@ -19,8 +20,7 @@ impl Day02 {
         let func = if only_two {
             |(from, to)| Self::sum_invalid_ids_doubles(from, to)
         } else {
-            // |(from, to)| Self::sum_invalid_ids_any(from, to)
-            |(from, to)| Self::sum_invalid_ids_any(from, to)
+            |(from, to)| Self::find_invalid_ids_any(from, to).iter().sum()
         };
 
         let sum: u64 = first_line
@@ -85,12 +85,12 @@ impl Day02 {
         sum
     }
 
-    /// In a provided product range, sum the invalid ids (any duplicate groups)
+    /// In a provided product range, find the invalid ids (any duplicate groups)
     ///
     /// Instead of looping over all possible codes, we directly assemble all possible invalid codes
     /// and only then check if they are inside the given range.
-    fn sum_invalid_ids_any(from: u64, to: u64) -> u64 {
-        let mut sum: u64 = 0;
+    fn find_invalid_ids_any(from: u64, to: u64) -> HashSet<u64> {
+        let mut result: HashSet<u64> = HashSet::new();
 
         // `length` / `L` is the number of digits in the code
         // When the range consists of multiple magnitudes, just loop over all of them
@@ -102,26 +102,25 @@ impl Day02 {
                     continue; // `L` is not a neat multiple of `k`
                 }
 
-                let ones: u64 = (0..k).map(|i| 10_u64.pow(i)).sum(); // E.g. 111 for k = 3
-
                 // `n` is the number that's being repeated, e.g. `12` into `121212...`
-                for n in (10_u64.pow(k - 1))..=(10_u64.pow(k) - 1) {
-                    if k > 1 && n % ones == 0 {
-                        continue; // Skip numbers that only repeat, e.g. `11` or `4444`
-                        // Otherwise we would get duplicate results
-                    }
-
+                // For e.g. `k = 3` it should range from 100 to 999
+                for n in 10_u64.pow(k - 1)..=(10_u64.pow(k) - 1) {
                     let num: u64 = (0..r).map(|i| n * 10_u64.pow(i * k)).sum();
+                    // Build the test number by decimally concatenating:
+                    // E.g. 121212 = 12 * 10'000 + 12 * 100 + 12 * 1
 
                     if num > to {
-                        break; // `num` will only increase further in this loop, abort
+                        break; // `num` will only increase further in this loop, so just abort
                     } else if num >= from {
-                        sum += num;
+                        // Found an invalid code
+                        result.insert(num);
+                        // We could easily encounter duplicates, e.g. when `n = 1212`, we solve
+                        // this by just keeping a unique list
                     }
                 }
             }
         }
-        sum
+        result
     }
 }
 
@@ -168,35 +167,28 @@ mod tests {
 
     #[test]
     fn find_invalid_ids_any() {
-        assert_eq!(Day02::sum_invalid_ids_any(95, 115), 99 + 111);
+        // Manual:
         assert_eq!(
-            Day02::sum_invalid_ids_any(831, 1296),
-            888 + 999 + 1111 + 1010 + 1212
+            Day02::find_invalid_ids_any(95, 115),
+            HashSet::from([99, 111]),
         );
-        assert_eq!(Day02::sum_invalid_ids_any(26439, 45395), 33333 + 44444);
         assert_eq!(
-            Day02::sum_invalid_ids_any(29330524, 29523460),
-            29332933
-                + 29342934
-                + 29352935
-                + 29362936
-                + 29372937
-                + 29382938
-                + 29392939
-                + 29402940
-                + 29412941
-                + 29422942
-                + 29432943
-                + 29442944
-                + 29452945
-                + 29462946
-                + 29472947
-                + 29482948
-                + 29492949
-                + 29502950
-                + 29512951
-                + 29522952
-        ); // Generated with a helper function
+            Day02::find_invalid_ids_any(831, 1296),
+            HashSet::from([888, 999, 1111, 1010, 1212]),
+        );
+        assert_eq!(
+            Day02::find_invalid_ids_any(26439, 45395),
+            HashSet::from([33333, 44444]),
+        );
+
+        // Automatic with ranges:
+        for (from, to) in [(10, 9999), (29330524, 29523460), (12067202, 12233567)] {
+            let brute_sum: HashSet<u64> = (from..=to)
+                .filter(|&code| _is_invalid_id_any(code))
+                .collect();
+
+            assert_eq!(Day02::find_invalid_ids_any(from, to), brute_sum);
+        }
     }
 
     #[test]
@@ -207,27 +199,6 @@ mod tests {
     }
 
     // Alternative brute-force methods, useful for testing:
-
-    #[test]
-    fn debug() {
-        dbg!(
-            (831..=1296)
-                .filter(|&code| _is_invalid_id_any(code))
-                .collect::<Vec<_>>()
-        );
-
-        dbg!(
-            (26439..=45395)
-                .filter(|&code| _is_invalid_id_any(code))
-                .collect::<Vec<_>>()
-        );
-
-        dbg!(
-            (29330524..=29523460)
-                .filter(|&code| _is_invalid_id_any(code))
-                .collect::<Vec<_>>()
-        );
-    }
 
     #[test]
     fn is_invalid_id_any() {
