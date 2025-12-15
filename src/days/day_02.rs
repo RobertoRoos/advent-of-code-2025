@@ -19,6 +19,7 @@ impl Day02 {
         let func = if only_two {
             |(from, to)| Self::sum_invalid_ids_doubles(from, to)
         } else {
+            // |(from, to)| Self::sum_invalid_ids_any(from, to)
             |(from, to)| Self::sum_invalid_ids_any(from, to)
         };
 
@@ -84,29 +85,43 @@ impl Day02 {
         sum
     }
 
-    fn is_invalid_id_any(code: u64) -> bool {
-        let code_str = format!("{}", code);
+    /// In a provided product range, sum the invalid ids (any duplicate groups)
+    ///
+    /// Instead of looping over all possible codes, we directly assemble all possible invalid codes
+    /// and only then check if they are inside the given range.
+    fn sum_invalid_ids_any(from: u64, to: u64) -> u64 {
+        let mut sum: u64 = 0;
 
-        // Check possible grouping sizes one after the other
-        for group_size in 1..=(code_str.len() / 2) {
-            let num_groups = code_str.len() / group_size;
-            if num_groups * group_size != code_str.len() {
-                continue; // Could not be a multiple of this group
-            }
+        // `length` / `L` is the number of digits in the code
+        // When the range consists of multiple magnitudes, just loop over all of them
+        for length in (from.ilog10() + 1)..=(to.ilog10() + 1) {
+            // `k` is the size of the group of repeated digits
+            for k in 1..=(length / 2) {
+                let r = length / k; // Number of repetitions needed of `k` digits
+                if r * k != length {
+                    continue; // `L` is not a neat multiple of `k`
+                }
 
-            let test_str = code_str[..group_size].repeat(num_groups);
-            if test_str == code_str {
-                return true;
+                let ones: u64 = (0..k).map(|i| 10_u64.pow(i)).sum(); // E.g. 111 for k = 3
+
+                // `n` is the number that's being repeated, e.g. `12` into `121212...`
+                for n in (10_u64.pow(k - 1))..=(10_u64.pow(k) - 1) {
+                    if k > 1 && n % ones == 0 {
+                        continue; // Skip numbers that only repeat, e.g. `11` or `4444`
+                        // Otherwise we would get duplicate results
+                    }
+
+                    let num: u64 = (0..r).map(|i| n * 10_u64.pow(i * k)).sum();
+
+                    if num > to {
+                        break; // `num` will only increase further in this loop, abort
+                    } else if num >= from {
+                        sum += num;
+                    }
+                }
             }
         }
-        false
-    }
-
-    /// In a provided product range, sum the invalid ids (any duplicate groups)
-    fn sum_invalid_ids_any(from: u64, to: u64) -> u64 {
-        (from..=to)
-            .filter(|&code| Self::is_invalid_id_any(code))
-            .sum()
+        sum
     }
 }
 
@@ -152,14 +167,36 @@ mod tests {
     }
 
     #[test]
-    fn is_invalid_id_any() {
-        assert_eq!(Day02::is_invalid_id_any(11), true);
-        assert_eq!(Day02::is_invalid_id_any(111), true);
-        assert_eq!(Day02::is_invalid_id_any(12), false);
-        assert_eq!(Day02::is_invalid_id_any(1112), false);
-        assert_eq!(Day02::is_invalid_id_any(1212), true);
-        assert_eq!(Day02::is_invalid_id_any(123123123), true);
-        assert_eq!(Day02::is_invalid_id_any(123123124), false);
+    fn find_invalid_ids_any() {
+        assert_eq!(Day02::sum_invalid_ids_any(95, 115), 99 + 111);
+        assert_eq!(
+            Day02::sum_invalid_ids_any(831, 1296),
+            888 + 999 + 1111 + 1010 + 1212
+        );
+        assert_eq!(Day02::sum_invalid_ids_any(26439, 45395), 33333 + 44444);
+        assert_eq!(
+            Day02::sum_invalid_ids_any(29330524, 29523460),
+            29332933
+                + 29342934
+                + 29352935
+                + 29362936
+                + 29372937
+                + 29382938
+                + 29392939
+                + 29402940
+                + 29412941
+                + 29422942
+                + 29432943
+                + 29442944
+                + 29452945
+                + 29462946
+                + 29472947
+                + 29482948
+                + 29492949
+                + 29502950
+                + 29512951
+                + 29522952
+        ); // Generated with a helper function
     }
 
     #[test]
@@ -167,5 +204,57 @@ mod tests {
         let solver = Day02 {};
         let result = solver.run_part_2(PathBuf::from("tests/day_02/sample.txt"));
         assert_eq!(result, Outcome::U64(4174379265));
+    }
+
+    // Alternative brute-force methods, useful for testing:
+
+    #[test]
+    fn debug() {
+        dbg!(
+            (831..=1296)
+                .filter(|&code| _is_invalid_id_any(code))
+                .collect::<Vec<_>>()
+        );
+
+        dbg!(
+            (26439..=45395)
+                .filter(|&code| _is_invalid_id_any(code))
+                .collect::<Vec<_>>()
+        );
+
+        dbg!(
+            (29330524..=29523460)
+                .filter(|&code| _is_invalid_id_any(code))
+                .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn is_invalid_id_any() {
+        assert_eq!(_is_invalid_id_any(11), true);
+        assert_eq!(_is_invalid_id_any(111), true);
+        assert_eq!(_is_invalid_id_any(12), false);
+        assert_eq!(_is_invalid_id_any(1112), false);
+        assert_eq!(_is_invalid_id_any(1212), true);
+        assert_eq!(_is_invalid_id_any(123123123), true);
+        assert_eq!(_is_invalid_id_any(123123124), false);
+    }
+
+    fn _is_invalid_id_any(code: u64) -> bool {
+        let code_str = format!("{}", code);
+
+        // Check possible grouping sizes one after the other
+        for group_size in 1..=(code_str.len() / 2) {
+            let num_groups = code_str.len() / group_size;
+            if num_groups * group_size != code_str.len() {
+                continue; // Could not be a multiple of this group
+            }
+
+            let test_str = code_str[..group_size].repeat(num_groups);
+            if test_str == code_str {
+                return true;
+            }
+        }
+        false
     }
 }
