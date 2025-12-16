@@ -5,8 +5,6 @@ use std::path::PathBuf;
 
 pub struct Day02;
 
-impl Day02 {}
-
 impl Day02 {
     /// Shared solution logic for both part 1 and 2
     fn sum_invalid_ids_in_ranges(&self, input_file: PathBuf, only_two: bool) -> Outcome {

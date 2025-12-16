@@ -12,7 +12,7 @@ use std::{path, path::PathBuf, time::Instant};
 #[command(version, about, long_about = None)]
 struct Args {
     /// Day of the challenge
-    #[arg(value_parser=clap::value_parser!(u8).range(1..=2))]
+    #[arg(value_parser=clap::value_parser!(u8).range(1..=12))]
     day: u8,
 
     /// Path to the input.txt file
