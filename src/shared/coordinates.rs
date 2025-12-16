@@ -161,6 +161,11 @@ impl Grid {
         self.items.insert(loc, symbol);
     }
 
+    /// Remove an item from this grid
+    pub fn remove_item(&mut self, loc: &RowCol) {
+        self.items.remove(loc);
+    }
+
     fn neighbouring_items(&self, loc: &RowCol) -> impl Iterator<Item = (RowCol, char)> {
         loc.neighbours().filter_map(|n_loc| {
             let item = self.items.get(&n_loc);

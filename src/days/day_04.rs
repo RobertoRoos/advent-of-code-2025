@@ -19,17 +19,25 @@ static SURROUNDING: [RowCol; 8] = [
 impl Solution for Day04 {
     fn run_part_1(&self, input_file: PathBuf) -> Outcome {
         let grid = Grid::from(self.get_file_reader(input_file).lines());
-
-        // Count number of items in the grid that have less than 4 surrounding items
         let count = self.find_accessible_locations(&grid).count();
-
         Outcome::I32(count as i32)
     }
 
     fn run_part_2(&self, input_file: PathBuf) -> Outcome {
-        let _grid = Grid::from(self.get_file_reader(input_file).lines());
+        let mut grid = Grid::from(self.get_file_reader(input_file).lines());
+        let mut removed: i32 = 0;
 
-        Outcome::I32(0)
+        loop {
+            let to_be_removed: Vec<RowCol> = self.find_accessible_locations(&grid).collect();
+            if to_be_removed.is_empty() {
+                break;
+            }
+            for loc in to_be_removed.into_iter() {
+                grid.remove_item(&loc);
+                removed += 1;
+            }
+        }
+        Outcome::I32(removed)
     }
 }
 
@@ -63,7 +71,7 @@ mod tests {
     #[test]
     fn test_part_2_sample() {
         let solver = Day04 {};
-        let result = solver.run_part_1(PathBuf::from("tests/day_04/sample.txt"));
+        let result = solver.run_part_2(PathBuf::from("tests/day_04/sample.txt"));
         assert_eq!(result, Outcome::I32(43));
     }
 }
