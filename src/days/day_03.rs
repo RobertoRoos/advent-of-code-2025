@@ -7,22 +7,26 @@ pub struct Day03;
 
 impl Solution for Day03 {
     fn run_part_1(&self, input_file: PathBuf) -> Outcome {
+        self.run_with_digits(input_file, 2)
+    }
+
+    fn run_part_2(&self, input_file: PathBuf) -> Outcome {
+        self.run_with_digits(input_file, 12)
+    }
+}
+
+impl Day03 {
+    fn run_with_digits(&self, input_file: PathBuf, digits: usize) -> Outcome {
         let sum: u64 = self
             .get_file_reader(input_file)
             .lines()
             .map(|line| Self::parse_line(&line.unwrap()))
-            .map(|list| Self::make_highest_number(&list) as u64)
+            .map(|list| Self::make_highest_number(&list, digits))
             .sum();
 
         Outcome::U64(sum)
     }
 
-    fn run_part_2(&self, _input_file: PathBuf) -> Outcome {
-        Outcome::Text(String::from("d3p2"))
-    }
-}
-
-impl Day03 {
     /// Turn line of number characters into a vector of numbers
     fn parse_line(line: &str) -> Vec<u8> {
         const RADIX: u32 = 10;
@@ -38,20 +42,32 @@ impl Day03 {
             .enumerate()
             .rev()
             .max_by_key(|&(_, value)| value)
-            .map(|(idx, &value)| (idx, value))
+            .map(|(idx, &value)| (idx + skip_start, value))
             .unwrap()
+        // `enumerate` will create an index _after_ the slice, hence we need to offset it again
+        // later by `skip_start`.
         // `max_by_key` will always prefer last values, but we really need to the first, hence
-        // we reverse the iterator order
+        // we reverse the iterator order.
     }
 
     /// Return the highest number that can be composed by the list of single digits
-    fn make_highest_number(list: &[u8]) -> u8 {
-        let (d1_idx, d1) = Self::find_max_in(list, 0, 1);
-        let (_, d2) = Self::find_max_in(list, d1_idx + 1, 0);
+    ///
+    /// This is done by first finding the highest digit (except the last `digits - 1` items) and
+    /// then combining it with the highest digit that follows it (except the last `digits - 2`
+    /// items), etc.
+    fn make_highest_number(list: &[u8], digits: usize) -> u64 {
+        let mut num: u64 = 0;
+        let mut idx = 0;
         const DIGIT_RANGE: RangeInclusive<u8> = 1..=9;
-        assert!(DIGIT_RANGE.contains(&d1));
-        assert!(DIGIT_RANGE.contains(&d2));
-        d1 * 10 + d2
+
+        for i in (0..digits).rev() {
+            let next_digit: u8;
+            (idx, next_digit) = Self::find_max_in(list, idx, i);
+            idx += 1;
+            assert!(DIGIT_RANGE.contains(&next_digit));
+            num += next_digit as u64 * 10_u64.pow(i as u32);
+        }
+        num
     }
 }
 
@@ -61,13 +77,26 @@ mod tests {
 
     #[test]
     fn test_make_highest_number() {
-        assert_eq!(Day03::make_highest_number(&[1, 2, 3, 4, 5]), 45);
-        assert_eq!(Day03::make_highest_number(&[5, 4, 3, 2, 1]), 54);
-        assert_eq!(Day03::make_highest_number(&[5, 6, 3, 1, 2, 8, 9, 2, 1]), 92);
+        assert_eq!(Day03::make_highest_number(&[1, 2, 3, 4, 5], 2), 45);
+        assert_eq!(Day03::make_highest_number(&[5, 4, 3, 2, 1], 2), 54);
+        assert_eq!(
+            Day03::make_highest_number(&[5, 6, 3, 1, 2, 8, 9, 2, 1], 2),
+            92
+        );
         // Make sure that we don't pick the last highest number:
         assert_eq!(
-            Day03::make_highest_number(&[6, 7, 6, 5, 7, 5, 7, 1, 7, 5]),
+            Day03::make_highest_number(&[6, 7, 6, 5, 7, 5, 7, 1, 7, 5], 2),
             77
+        );
+    }
+
+    #[test]
+    fn test_make_highest_number_more_digits() {
+        assert_eq!(Day03::make_highest_number(&[1, 2, 3, 4, 5], 3), 345);
+        assert_eq!(Day03::make_highest_number(&[5, 4, 3, 2, 1], 4), 5432);
+        assert_eq!(
+            Day03::make_highest_number(&[5, 6, 3, 1, 2, 8, 9, 2, 1], 4),
+            8921
         );
     }
 
@@ -90,5 +119,12 @@ mod tests {
         let solver = Day03 {};
         let result = solver.run_part_1(PathBuf::from("tests/day_03/sample.txt"));
         assert_eq!(result, Outcome::U64(357));
+    }
+
+    #[test]
+    fn test_part_2_sample() {
+        let solver = Day03 {};
+        let result = solver.run_part_2(PathBuf::from("tests/day_03/sample.txt"));
+        assert_eq!(result, Outcome::U64(3121910778619));
     }
 }
