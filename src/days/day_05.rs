@@ -16,7 +16,7 @@ impl Solution for Day05 {
             .filter(|number| ranges.iter().any(|range| range.contains(number)))
             .count();
 
-        Outcome::I32(count as i32)
+        Outcome::U64(count.try_into().unwrap())
     }
 
     fn run_part_2(&self, input_file: PathBuf) -> Outcome {
@@ -88,7 +88,7 @@ mod tests {
     fn test_part_1_sample() {
         let solver = Day05 {};
         let result = solver.run_part_1(PathBuf::from("tests/day_05/sample.txt"));
-        assert_eq!(result, Outcome::I32(3));
+        assert_eq!(result, Outcome::U64(3));
     }
 
     #[allow(clippy::reversed_empty_ranges)]

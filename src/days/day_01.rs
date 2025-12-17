@@ -21,9 +21,9 @@ impl Day01 {
     /// Update code with step, wrapping in [0, 100> and count the number of zero-passes
     ///
     /// Note that if `code` starts at 0, this won't be counted!
-    fn wrap_step(code: i32, step: i32) -> (i32, i32) {
+    fn wrap_step(code: i32, step: i32) -> (i32, u64) {
         let mut new_code = code;
-        let mut zeros_count: i32;
+        let mut zeros_count;
 
         if step >= 0 {
             new_code += step;
@@ -41,14 +41,14 @@ impl Day01 {
                 zeros_count += 1; // Also count the final 0
             }
         }
-        (new_code, zeros_count)
+        (new_code, zeros_count.try_into().unwrap())
     }
 }
 
 impl Solution for Day01 {
     /// Part 1 solution
     fn run_part_1(&self, input_file: PathBuf) -> Outcome {
-        let mut zeros_count: i32 = 0;
+        let mut zeros_count = 0;
 
         self.get_file_reader(input_file)
             .lines()
@@ -61,7 +61,7 @@ impl Solution for Day01 {
                 next
             });
 
-        Outcome::I32(zeros_count)
+        Outcome::U64(zeros_count)
     }
 
     /// Part 2 solution
@@ -69,13 +69,13 @@ impl Solution for Day01 {
         let (_final_code, zeros) =
             self.get_file_reader(input_file)
                 .lines()
-                .fold((50, 0), |acc, line| {
+                .fold((50, 0_u64), |acc, line| {
                     let (code, zeros) = acc;
                     let step = Self::step_to_number(&line.unwrap());
                     let (next_code, extra_zeros) = Self::wrap_step(code, step);
                     (next_code, zeros + extra_zeros)
                 });
-        Outcome::I32(zeros)
+        Outcome::U64(zeros)
     }
 }
 
@@ -93,7 +93,7 @@ mod tests {
     fn part_1_sample() {
         let solver = Day01 {};
         let result = solver.run_part_1(PathBuf::from("tests/day_01/sample.txt"));
-        assert_eq!(result, Outcome::I32(3));
+        assert_eq!(result, Outcome::U64(3));
     }
 
     #[test]
@@ -130,6 +130,6 @@ mod tests {
     fn part_2_sample() {
         let solver = Day01 {};
         let result = solver.run_part_2(PathBuf::from("tests/day_01/sample.txt"));
-        assert_eq!(result, Outcome::I32(6));
+        assert_eq!(result, Outcome::U64(6));
     }
 }

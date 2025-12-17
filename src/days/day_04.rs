@@ -20,12 +20,12 @@ impl Solution for Day04 {
     fn run_part_1(&self, input_file: PathBuf) -> Outcome {
         let grid = Grid::from(self.get_file_reader(input_file).lines());
         let count = self.find_accessible_locations(&grid).count();
-        Outcome::I32(count as i32)
+        Outcome::U64(count.try_into().unwrap())
     }
 
     fn run_part_2(&self, input_file: PathBuf) -> Outcome {
         let mut grid = Grid::from(self.get_file_reader(input_file).lines());
-        let mut removed: i32 = 0;
+        let mut removed = 0;
 
         loop {
             let to_be_removed: Vec<RowCol> = self.find_accessible_locations(&grid).collect();
@@ -37,7 +37,7 @@ impl Solution for Day04 {
                 removed += 1;
             }
         }
-        Outcome::I32(removed)
+        Outcome::U64(removed)
     }
 }
 
@@ -65,13 +65,13 @@ mod tests {
     fn test_part_1_sample() {
         let solver = Day04 {};
         let result = solver.run_part_1(PathBuf::from("tests/day_04/sample.txt"));
-        assert_eq!(result, Outcome::I32(13));
+        assert_eq!(result, Outcome::U64(13));
     }
 
     #[test]
     fn test_part_2_sample() {
         let solver = Day04 {};
         let result = solver.run_part_2(PathBuf::from("tests/day_04/sample.txt"));
-        assert_eq!(result, Outcome::I32(43));
+        assert_eq!(result, Outcome::U64(43));
     }
 }

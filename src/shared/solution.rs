@@ -8,7 +8,6 @@ use std::path::PathBuf;
 #[derive(PartialEq, Debug)]
 #[allow(dead_code)]
 pub enum Outcome {
-    I32(i32),
     U64(u64),
     Text(String),
 }
@@ -17,7 +16,6 @@ pub enum Outcome {
 impl Display for Outcome {
     fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match self {
-            Outcome::I32(n) => write!(f, "{}", n),
             Outcome::U64(n) => write!(f, "{}", n),
             Outcome::Text(txt) => write!(f, "{}", txt),
         }
