@@ -19,7 +19,7 @@ static SURROUNDING: [RowCol; 8] = [
 impl Solution for Day04 {
     fn run_part_1(&self, input_file: PathBuf) -> Outcome {
         let grid = Grid::from(self.get_file_reader(input_file).lines());
-        let count = self.find_accessible_locations(&grid).count();
+        let count = Self::find_accessible_locations(&grid).count();
         Outcome::U64(count.try_into().unwrap())
     }
 
@@ -28,12 +28,12 @@ impl Solution for Day04 {
         let mut removed = 0;
 
         loop {
-            let to_be_removed: Vec<RowCol> = self.find_accessible_locations(&grid).collect();
+            let to_be_removed: Vec<RowCol> = Self::find_accessible_locations(&grid).collect();
             if to_be_removed.is_empty() {
                 break;
             }
-            for loc in to_be_removed.into_iter() {
-                grid.remove_item(&loc);
+            for loc in to_be_removed {
+                grid.remove_item(loc);
                 removed += 1;
             }
         }
@@ -42,7 +42,7 @@ impl Solution for Day04 {
 }
 
 impl Day04 {
-    fn find_accessible_locations(&self, grid: &Grid) -> impl Iterator<Item = RowCol> {
+    fn find_accessible_locations(grid: &Grid) -> impl Iterator<Item = RowCol> {
         // Count number of items in the grid that have less than 4 surrounding items
         grid.items
             .iter()

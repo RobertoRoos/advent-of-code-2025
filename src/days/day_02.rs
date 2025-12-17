@@ -23,7 +23,7 @@ impl Day02 {
         };
 
         let sum: u64 = first_line
-            .split(",")
+            .split(',')
             .map(|line| self.get_range_from_line(line))
             .map(func)
             .sum();
@@ -103,7 +103,7 @@ impl Day02 {
 
                 // `n` is the number that's being repeated, e.g. `12` into `121212...`
                 // For e.g. `k = 3` it should range from 100 to 999
-                for n in 10_u64.pow(k - 1)..=(10_u64.pow(k) - 1) {
+                for n in 10_u64.pow(k - 1)..10_u64.pow(k) {
                     let num: u64 = (0..r).map(|i| n * 10_u64.pow(i * k)).sum();
                     // Build the test number by decimally concatenating:
                     // E.g. 121212 = 12 * 10'000 + 12 * 100 + 12 * 1
@@ -134,7 +134,11 @@ impl Solution for Day02 {
 }
 
 #[cfg(test)]
-#[allow(clippy::bool_assert_comparison)]
+#[allow(
+    clippy::bool_assert_comparison,
+    clippy::used_underscore_items,
+    clippy::unreadable_literal
+)]
 mod tests {
     use super::*;
 
@@ -144,16 +148,16 @@ mod tests {
         assert_eq!(Day02::get_next_or_current_invalid_id_doubles(12), 22);
         assert_eq!(Day02::get_next_or_current_invalid_id_doubles(111), 1010);
         assert_eq!(
-            Day02::get_next_or_current_invalid_id_doubles(123000),
-            123123
+            Day02::get_next_or_current_invalid_id_doubles(123_000),
+            123_123
         );
         assert_eq!(
-            Day02::get_next_or_current_invalid_id_doubles(123124),
-            124124
+            Day02::get_next_or_current_invalid_id_doubles(123_124),
+            124_124
         );
         assert_eq!(
-            Day02::get_next_or_current_invalid_id_doubles(5555555),
-            10001000
+            Day02::get_next_or_current_invalid_id_doubles(5_555_555),
+            10_001_000
         );
     }
 
@@ -211,7 +215,7 @@ mod tests {
     }
 
     fn _is_invalid_id_any(code: u64) -> bool {
-        let code_str = format!("{}", code);
+        let code_str = format!("{code}");
 
         // Check possible grouping sizes one after the other
         for group_size in 1..=(code_str.len() / 2) {

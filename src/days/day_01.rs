@@ -56,7 +56,7 @@ impl Solution for Day01 {
                 let step = Self::step_to_number(&line.unwrap());
                 let next = (acc + step).rem_euclid(100);
                 if next == 0 {
-                    zeros_count += 1
+                    zeros_count += 1;
                 }
                 next
             });
@@ -123,7 +123,7 @@ mod tests {
         assert_eq!(Day01::wrap_step(1, -102), (99, 2));
         assert_eq!(Day01::wrap_step(0, -10), (90, 0));
         assert_eq!(Day01::wrap_step(0, -110), (90, 1));
-        assert_eq!(Day01::wrap_step(50, -1000), (50, 10))
+        assert_eq!(Day01::wrap_step(50, -1000), (50, 10));
     }
 
     #[test]

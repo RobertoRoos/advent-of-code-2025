@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 mod days;
 mod shared;
 
@@ -59,5 +61,5 @@ fn main() {
         eprintln!("Computation time: {:.4} ms", elapsed.as_secs_f32() * 1.0e3);
     }
 
-    println!("{}", result);
+    println!("{result}");
 }

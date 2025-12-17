@@ -80,6 +80,7 @@ impl Day05 {
     }
 }
 
+#[allow(clippy::unreadable_literal)]
 #[cfg(test)]
 mod tests {
     use super::*;

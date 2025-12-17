@@ -1,6 +1,5 @@
 use crate::shared::{Outcome, Solution};
 use std::io::BufRead;
-use std::ops::RangeInclusive;
 use std::path::PathBuf;
 
 pub struct Day03;
@@ -31,7 +30,7 @@ impl Day03 {
     fn parse_line(line: &str) -> Vec<u8> {
         const RADIX: u32 = 10;
         line.chars()
-            .map(|c| c.to_digit(RADIX).unwrap() as u8)
+            .map(|c| c.to_digit(RADIX).unwrap().try_into().unwrap())
             .collect()
     }
 
@@ -58,14 +57,13 @@ impl Day03 {
     fn make_highest_number(list: &[u8], digits: usize) -> u64 {
         let mut num: u64 = 0;
         let mut idx = 0;
-        const DIGIT_RANGE: RangeInclusive<u8> = 1..=9;
 
         for i in (0..digits).rev() {
             let next_digit: u8;
             (idx, next_digit) = Self::find_max_in(list, idx, i);
             idx += 1;
-            assert!(DIGIT_RANGE.contains(&next_digit));
-            num += next_digit as u64 * 10_u64.pow(i as u32);
+            assert!((1..=9).contains(&next_digit));
+            num += u64::from(next_digit) * 10_u64.pow(i.try_into().unwrap());
         }
         num
     }
@@ -125,6 +123,6 @@ mod tests {
     fn test_part_2_sample() {
         let solver = Day03 {};
         let result = solver.run_part_2(PathBuf::from("tests/day_03/sample.txt"));
-        assert_eq!(result, Outcome::U64(3121910778619));
+        assert_eq!(result, Outcome::U64(3_121_910_778_619));
     }
 }

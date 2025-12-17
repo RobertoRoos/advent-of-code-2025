@@ -51,7 +51,7 @@ impl RowCol {
     }
 
     /// Get a new coordinate of a neighboring location
-    pub fn step(&self, dir: &Direction) -> Self {
+    pub fn step(self, dir: &Direction) -> Self {
         match dir {
             Direction::Up => Self::new(self.row - 1, self.col),
             Direction::Right => Self::new(self.row, self.col + 1),
@@ -149,9 +149,10 @@ impl Grid {
 
     /// Insert a new item into the grid
     fn add_item(&mut self, loc: RowCol, symbol: char) {
-        if self.items.contains_key(&loc) {
-            panic!("Item {} is already filled in the grid", loc);
-        }
+        assert!(
+            !self.items.contains_key(&loc),
+            "Item {loc} is already filled in the grid"
+        );
         if loc.row >= self.rows {
             self.rows = loc.row + 1;
         }
@@ -162,8 +163,8 @@ impl Grid {
     }
 
     /// Remove an item from this grid
-    pub fn remove_item(&mut self, loc: &RowCol) {
-        self.items.remove(loc);
+    pub fn remove_item(&mut self, loc: RowCol) {
+        self.items.remove(&loc);
     }
 
     fn neighbouring_items(&self, loc: &RowCol) -> impl Iterator<Item = (RowCol, char)> {
@@ -181,7 +182,7 @@ impl Grid {
         let row = self.rows;
         self.rows += 1;
         for (col, symbol) in line.chars().enumerate() {
-            let col = col as i16;
+            let col: i16 = col.try_into().unwrap();
             if col >= self.cols {
                 self.cols += 1; // Also expand the column range for white-space
             }
@@ -199,7 +200,7 @@ impl Grid {
             for col in self.range_cols() {
                 let loc = RowCol::new(row, col);
                 let c = self.items.get(&loc).unwrap_or(&'.');
-                print!("{}", c);
+                print!("{c}");
             }
             println!();
         }
@@ -238,7 +239,7 @@ mod tests_row_col {
         let loc = RowCol::new(3, 1);
         let mut list: Vec<RowCol> = Vec::new();
         for next in loc.neighbours() {
-            list.push(next)
+            list.push(next);
         }
         assert_eq!(
             list,
@@ -248,7 +249,7 @@ mod tests_row_col {
                 RowCol::new(4, 1),
                 RowCol::new(3, 0),
             ]
-        )
+        );
     }
 
     #[test]
