@@ -8,13 +8,7 @@ pub struct Day05;
 impl Solution for Day05 {
     fn run_part_1(&self, input_file: PathBuf) -> Outcome {
         let mut lines = self.get_file_reader(input_file).lines();
-
-        let ranges: Vec<RangeInclusive<u64>> = lines
-            .by_ref()
-            .take_while(|line| !line.as_ref().unwrap().is_empty())
-            .map(|line| self.get_range_from_line(&line.unwrap()))
-            .collect();
-
+        let ranges = self.make_ranges(lines.by_ref());
         let count = lines
             .map(|line| line.unwrap().parse::<u64>().unwrap())
             .filter(|number| ranges.iter().any(|range| range.contains(number)))
@@ -29,11 +23,16 @@ impl Solution for Day05 {
 }
 
 impl Day05 {
-    // /// Parse a textual range into a literal range
-    // fn parse_range(line: &str) -> RangeInclusive<u64> {
-    //     let mut split = line.split("-");
-    //     split.next().unwrap().parse().unwrap()..=split.next().unwrap().parse().unwrap()
-    // }
+    /// Get ranges from the first part of the input file
+    fn make_ranges(
+        &self,
+        lines: &mut std::io::Lines<std::io::BufReader<std::fs::File>>,
+    ) -> Vec<RangeInclusive<u64>> {
+        lines
+            .take_while(|line| !line.as_ref().unwrap().is_empty())
+            .map(|line| self.get_range_from_line(&line.unwrap()))
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -45,5 +44,12 @@ mod tests {
         let solver = Day05 {};
         let result = solver.run_part_1(PathBuf::from("tests/day_05/sample.txt"));
         assert_eq!(result, Outcome::I32(3));
+    }
+
+    #[test]
+    fn part_2_sample() {
+        let solver = Day05 {};
+        let result = solver.run_part_2(PathBuf::from("tests/day_05/sample.txt"));
+        assert_eq!(result, Outcome::I32(14));
     }
 }
