@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::io::BufReader;
+use std::ops::RangeInclusive;
 use std::path::PathBuf;
 
 /// Possible outcomes for a daily solver (either a number or a string directly)
@@ -49,5 +50,11 @@ pub trait Solution {
     fn get_file_reader(&self, input_file: PathBuf) -> BufReader<File> {
         let file = File::open(input_file).unwrap();
         BufReader::new(file)
+    }
+
+    /// Make a Range object from a string like "11-22" (inclusive start and end)
+    fn get_range_from_line(&self, line: &str) -> RangeInclusive<u64> {
+        let mut split = line.split("-");
+        split.next().unwrap().parse().unwrap()..=split.next().unwrap().parse().unwrap()
     }
 }

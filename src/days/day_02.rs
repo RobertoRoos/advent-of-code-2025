@@ -1,6 +1,7 @@
 use crate::shared::{Outcome, Solution};
 use std::collections::HashSet;
 use std::io::BufRead;
+use std::ops::RangeInclusive;
 use std::path::PathBuf;
 
 pub struct Day02;
@@ -16,28 +17,28 @@ impl Day02 {
             .unwrap();
 
         let func = if only_two {
-            |(from, to)| Self::sum_invalid_ids_doubles(from, to)
+            Self::sum_invalid_ids_doubles
         } else {
-            |(from, to)| Self::find_invalid_ids_any(from, to).iter().sum()
+            |range| Self::find_invalid_ids_any(range).iter().sum()
         };
 
         let sum: u64 = first_line
             .split(",")
-            .map(Self::parse_id_range)
+            .map(|line| self.get_range_from_line(line))
             .map(func)
             .sum();
 
         Outcome::U64(sum)
     }
 
-    /// Parse an ID range, e.g. "11-22" becomes (11, 22)
-    fn parse_id_range(segment: &str) -> (u64, u64) {
-        let mut parts = segment.split("-");
-        (
-            parts.next().unwrap().parse().unwrap(),
-            parts.next().unwrap().parse().unwrap(),
-        )
-    }
+    // /// Parse an ID range, e.g. "11-22" becomes (11, 22)
+    // fn parse_id_range(segment: &str) -> (u64, u64) {
+    //     let mut parts = segment.split("-");
+    //     (
+    //         parts.next().unwrap().parse().unwrap(),
+    //         parts.next().unwrap().parse().unwrap(),
+    //     )
+    // }
 
     /// Get the next invalid id (or just the given one, if already invalid)
     fn get_next_or_current_invalid_id_doubles(num: u64) -> u64 {
@@ -68,12 +69,12 @@ impl Day02 {
     }
 
     /// In a provided product range, sum the invalid ids (doubled digit group)
-    fn sum_invalid_ids_doubles(from: u64, to: u64) -> u64 {
-        let mut num = from;
+    fn sum_invalid_ids_doubles(range: RangeInclusive<u64>) -> u64 {
+        let mut num = *range.start();
         let mut sum = 0;
         loop {
             num = Self::get_next_or_current_invalid_id_doubles(num);
-            if num > to {
+            if !range.contains(&num) {
                 break;
             }
             sum += num;
@@ -87,12 +88,12 @@ impl Day02 {
     ///
     /// Instead of looping over all possible codes, we directly assemble all possible invalid codes
     /// and only then check if they are inside the given range.
-    fn find_invalid_ids_any(from: u64, to: u64) -> HashSet<u64> {
+    fn find_invalid_ids_any(range: RangeInclusive<u64>) -> HashSet<u64> {
         let mut result: HashSet<u64> = HashSet::new();
 
         // `length` / `L` is the number of digits in the code
         // When the range consists of multiple magnitudes, just loop over all of them
-        for length in (from.ilog10() + 1)..=(to.ilog10() + 1) {
+        for length in (range.start().ilog10() + 1)..=(range.end().ilog10() + 1) {
             // `k` is the size of the group of repeated digits
             for k in 1..=(length / 2) {
                 let r = length / k; // Number of repetitions needed of `k` digits
@@ -107,13 +108,13 @@ impl Day02 {
                     // Build the test number by decimally concatenating:
                     // E.g. 121212 = 12 * 10'000 + 12 * 100 + 12 * 1
 
-                    if num > to {
-                        break; // `num` will only increase further in this loop, so just abort
-                    } else if num >= from {
+                    if range.contains(&num) {
                         // Found an invalid code
                         result.insert(num);
                         // We could easily encounter duplicates, e.g. when `n = 1212`, we solve
                         // this by just keeping a unique list
+                    } else if num > *range.end() {
+                        break; // `num` will only increase further in this loop, so just abort
                     }
                 }
             }
@@ -167,15 +168,15 @@ mod tests {
     fn find_invalid_ids_any() {
         // Manual:
         assert_eq!(
-            Day02::find_invalid_ids_any(95, 115),
+            Day02::find_invalid_ids_any(95..=115),
             HashSet::from([99, 111]),
         );
         assert_eq!(
-            Day02::find_invalid_ids_any(831, 1296),
+            Day02::find_invalid_ids_any(831..=1296),
             HashSet::from([888, 999, 1111, 1010, 1212]),
         );
         assert_eq!(
-            Day02::find_invalid_ids_any(26439, 45395),
+            Day02::find_invalid_ids_any(26439..=45395),
             HashSet::from([33333, 44444]),
         );
 
@@ -185,7 +186,7 @@ mod tests {
                 .filter(|&code| _is_invalid_id_any(code))
                 .collect();
 
-            assert_eq!(Day02::find_invalid_ids_any(from, to), brute_sum);
+            assert_eq!(Day02::find_invalid_ids_any(from..=to), brute_sum);
         }
     }
 
