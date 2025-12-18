@@ -34,11 +34,7 @@ impl Solution for Day06 {
         let sum = numbers
             .iter()
             .enumerate()
-            .map(|(column_idx, column)| match operators[column_idx] {
-                '+' => column.iter().sum::<u64>(),
-                '*' => column.iter().product::<u64>(),
-                _ => panic!("Unrecognized character"),
-            })
+            .map(|(column_idx, column)| Self::column_operation(column, operators[column_idx]))
             .sum();
 
         Outcome::U64(sum)
@@ -46,6 +42,17 @@ impl Solution for Day06 {
 
     fn run_part_2(&self, _input_file: PathBuf) -> Outcome {
         Outcome::Text(String::from("d6p2"))
+    }
+}
+
+impl Day06 {
+    /// Perform a repeated math operation on a column
+    fn column_operation(column: &[u64], operator: char) -> u64 {
+        match operator {
+            '+' => column.iter().sum::<u64>(),
+            '*' => column.iter().product::<u64>(),
+            _ => panic!("Unrecognized character"),
+        }
     }
 }
 
@@ -58,5 +65,12 @@ mod tests {
         let solver = Day06 {};
         let result = solver.run_part_1(PathBuf::from("tests/day_06/sample.txt"));
         assert_eq!(result, Outcome::U64(4_277_556));
+    }
+
+    #[test]
+    fn part_2_sample() {
+        let solver = Day06 {};
+        let result = solver.run_part_2(PathBuf::from("tests/day_06/sample.txt"));
+        assert_eq!(result, Outcome::U64(3_263_827));
     }
 }
