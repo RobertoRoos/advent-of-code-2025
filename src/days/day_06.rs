@@ -2,6 +2,7 @@ use crate::shared::{Outcome, Solution};
 use std::io::BufRead;
 use std::ops::Range;
 use std::path::PathBuf;
+use std::str::Chars;
 
 pub struct Day06;
 
@@ -44,8 +45,10 @@ impl Solution for Day06 {
         let max_line_length: usize = lines.iter().map(|line| line.chars().count()).max().unwrap();
 
         let operators_line = lines.pop().unwrap();
-        let mut column_ranges: Vec<Range<usize>> = Vec::new();
-        let mut operators: Vec<char> = Vec::new();
+
+        // Build a list of the character ranges for colum
+        let mut column_ranges: Vec<Range<usize>> = Vec::new(); // Note: characters, not bytes!!!
+        let mut operators: Vec<char> = Vec::new(); // List of operators per column
         let mut last_idx = None;
         for (column_idx, c) in operators_line.chars().enumerate() {
             if c != ' ' {
@@ -60,21 +63,29 @@ impl Solution for Day06 {
             column_ranges.push(last_idx..max_line_length); // Last range will be missing
         }
 
-        let numbers: Vec<Vec<u64>> = column_ranges
-            .into_iter()
-            .map(|column_range| {
-                column_range
-                    .into_iter()
-                    .map(|pos| {
-                        let num_str = lines
-                            .iter()
-                            .map(|line| line.chars().nth(pos).unwrap_or(' '))
-                            .collect::<String>();
-                        num_str.trim().parse::<u64>().unwrap()
-                    })
-                    .collect()
-            })
-            .collect();
+        // Now build the matrix of numbers:
+        let mut numbers: Vec<Vec<u64>> = vec![Vec::new(); operators.len()];
+
+        // Track (mutable!) iterators to each of the lines.
+        // We will now advance through all lines, character by character.
+        let mut line_iters: Vec<Chars> = lines.iter().map(|line| line.chars()).collect();
+
+        for (column_idx, slice) in column_ranges.into_iter().enumerate() {
+            // Foreach character belonging to the next column, take the next character of each of
+            // the lines and combine them into strings:
+            for _ in slice {
+                let num_str: String = line_iters
+                    .iter_mut()
+                    .map(|it| it.next().unwrap_or(' '))
+                    .collect();
+                let num: u64 = num_str.trim().parse().unwrap();
+                numbers[column_idx].push(num);
+            }
+            // Advance iterators past empty spaces:
+            for it in &mut line_iters {
+                it.next();
+            }
+        }
 
         Outcome::U64(Self::sum_column_operations(&numbers, &operators))
     }
