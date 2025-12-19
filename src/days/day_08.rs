@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use crate::shared::{Outcome, Solution};
 use std::io::BufRead;
 use std::path::PathBuf;
@@ -24,6 +25,31 @@ impl Solution for Day08 {
             })
             .collect();
 
+        // Track circuits (= groups of connected junctions):
+        let mut circuits: Vec<HashSet<usize>> = Vec::new();
+
+        // Now connect the shortest junctions a bunch of times:
+        for _ in 0..Self::LIMIT {
+            let (pair, _) = Self::find_closest_pair(&junctions);
+
+            let mut circuit = None;
+
+            for this_circuit in circuits.iter_mut() {
+                if this_circuit.contains(&pair.0) || this_circuit.contains(&pair.1) {
+                    circuit = Some(this_circuit)
+                }
+            }
+            if circuit.is_none() {
+                let new_circuit = HashSet::new();
+                circuits.push(new_circuit);
+                circuit = Some(new_circuit);
+            }
+            let Some(circuit) = circuit;
+
+            circuit.insert(pair.0);
+            circuit.insert(pair.1); // Make sure both IDs are in there
+        }
+
         let (pair, _dist) = Self::find_closest_pair(&junctions);
 
         dbg!(junctions[pair.0], junctions[pair.1]);
@@ -37,6 +63,9 @@ impl Solution for Day08 {
 }
 
 impl Day08 {
+
+    const LIMIT: u16 = 1_000;
+
     /// Find the pair of points in a cloud that are closest
     ///
     /// Returns the two indices, as well as the final distance.
