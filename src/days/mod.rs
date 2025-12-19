@@ -36,7 +36,7 @@ pub fn get_solver(number: u8) -> Box<dyn Solution> {
         5 => Box::new(Day05 {}),
         6 => Box::new(Day06 {}),
         7 => Box::new(Day07 {}),
-        8 => Box::new(Day08 {limit: 1_000}),
+        8 => Box::new(Day08 { limit: 1_000 }),
         9 => Box::new(Day09 {}),
         10 => Box::new(Day10 {}),
         11 => Box::new(Day11 {}),
