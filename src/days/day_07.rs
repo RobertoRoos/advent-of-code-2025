@@ -1,5 +1,5 @@
 use crate::shared::{Grid, Outcome, RowCol, Solution};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::io::BufRead;
 use std::path::PathBuf;
 
@@ -7,39 +7,23 @@ pub struct Day07;
 
 impl Solution for Day07 {
     fn run_part_1(&self, input_file: PathBuf) -> Outcome {
-        let grid = Grid::from(self.get_file_reader(input_file).lines());
-
-        let loc_start = grid.get_item_by_symbol('S').unwrap();
-
-        // Keep a set of laser beam heads (a `set` to avoid having duplicates):
-        let mut tips: HashSet<RowCol> = HashSet::from([loc_start]);
-
-        let mut splits = 0;
-
-        // Walk through the next rows in the grid:
-        for row in loc_start.row..grid.rows {
-            let mut next_tips: HashSet<RowCol> = HashSet::new();
-
-            for tip in tips {
-                let next = RowCol::new(row, tip.col);
-                if grid.items.contains_key(&next) {
-                    next_tips.insert(next + RowCol::new(0, -1));
-                    next_tips.insert(next + RowCol::new(0, 1));
-                    splits += 1;
-                } else {
-                    next_tips.insert(next);
-                }
-            }
-            tips = next_tips; // Replace tips with the new list
-        }
-
-        Outcome::U64(splits)
+        self.count_tachyons(input_file, true)
     }
 
     fn run_part_2(&self, input_file: PathBuf) -> Outcome {
+        self.count_tachyons(input_file, false)
+    }
+}
+
+impl Day07 {
+    /// Combined solution for parts 1 and 2
+    fn count_tachyons(&self, input_file: PathBuf, splits_only: bool) -> Outcome {
         let grid = Grid::from(self.get_file_reader(input_file).lines());
 
         let loc_start = grid.get_item_by_symbol('S').unwrap();
+
+        // Count number of splits (for part 1 only)
+        let mut splits = 0;
 
         // Keep a set of laser beam x-positions together with how many paths lead there, so far
         let mut tips: HashMap<i16, u64> = HashMap::from([(loc_start.col, 1)]);
@@ -51,6 +35,7 @@ impl Solution for Day07 {
             for (tip_col, path_count) in tips {
                 let next = RowCol::new(row, tip_col);
                 let steps = if grid.items.contains_key(&next) {
+                    splits += 1;
                     vec![-1, 1]
                 } else {
                     vec![0]
@@ -62,7 +47,11 @@ impl Solution for Day07 {
             tips = next_tips; // Replace tips with the new list
         }
 
-        Outcome::U64(tips.values().sum())
+        Outcome::U64(if splits_only {
+            splits
+        } else {
+            tips.values().sum()
+        })
     }
 }
 
