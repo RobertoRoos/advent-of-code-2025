@@ -1,9 +1,9 @@
-use std::collections::{HashSet};
 use crate::shared::{Outcome, Solution};
+use std::collections::HashSet;
 use std::io::BufRead;
 use std::path::PathBuf;
 
-type Point = [i16; 3];
+type Point = [i32; 3];
 type Points = Vec<Point>;
 type Pair = (usize, usize);
 
@@ -20,14 +20,16 @@ impl Solution for Day08 {
                 let line = line.unwrap();
                 line.split(',')
                     .map(|part| part.parse().unwrap())
-                    .collect::<Vec<i16>>()
+                    .collect::<Vec<i32>>()
                     .try_into()
                     .unwrap()
             })
             .collect();
 
         // Track circuits (= groups of connected junctions):
-        let mut circuits: Vec<HashSet<usize>> = junctions.iter().enumerate()
+        let mut circuits: Vec<HashSet<usize>> = junctions
+            .iter()
+            .enumerate()
             .map(|(idx, _)| HashSet::from([idx]))
             .collect();
 
@@ -35,28 +37,27 @@ impl Solution for Day08 {
 
         // Get the shortest distances:
         for (pair, _dist) in distances.iter().take(self.limit) {
-
-            let circuit_1_idx = circuits.iter()
+            let circuit_1_idx = circuits
+                .iter()
                 .enumerate()
-                .filter_map(|(idx, set)| {
+                .find_map(|(idx, set)| {
                     if set.contains(&pair.0) {
                         Some(idx)
                     } else {
                         None
                     }
                 })
-                 .next()
-                 .unwrap();
-            let circuit_2_idx = circuits.iter()
+                .unwrap();
+            let circuit_2_idx = circuits
+                .iter()
                 .enumerate()
-                .filter_map(|(idx, set)| {
+                .find_map(|(idx, set)| {
                     if set.contains(&pair.1) {
                         Some(idx)
                     } else {
                         None
                     }
                 })
-                .next()
                 .unwrap();
 
             let moving: Vec<usize> = circuits[circuit_2_idx].drain().collect();
@@ -77,20 +78,15 @@ impl Solution for Day08 {
 }
 
 impl Day08 {
-
     /// Make a list of pairs and their distances and sort them
-    fn find_closest_pairs(points: &[Point]) -> Vec<(Pair, f32)> {
-
-        let mut distances: Vec<(Pair, f32)> = Vec::new();
+    fn find_closest_pairs(points: &[Point]) -> Vec<(Pair, f64)> {
+        let mut distances: Vec<(Pair, f64)> = Vec::new();
 
         for (i_a, point_a) in points.iter().enumerate() {
             for (i_b, point_b) in points[(i_a + 1)..].iter().enumerate() {
                 let i_b = i_a + 1 + i_b;
 
-                distances.push((
-                    (i_a, i_b),
-                    Self::distance(point_a, point_b),
-                ));
+                distances.push(((i_a, i_b), Self::distance(point_a, point_b)));
             }
         }
 
@@ -100,10 +96,10 @@ impl Day08 {
     }
 
     /// Get distance between 2 points in 3D space
-    fn distance(a: &Point, b: &Point) -> f32 {
-        (f32::from(b[0] - a[0]).powi(2)
-            + f32::from(b[1] - a[1]).powi(2)
-            + f32::from(b[2] - a[2]).powi(2))
+    fn distance(a: &Point, b: &Point) -> f64 {
+        (f64::from(b[0] - a[0]).powi(2)
+            + f64::from(b[1] - a[1]).powi(2)
+            + f64::from(b[2] - a[2]).powi(2))
         .sqrt()
     }
 }
@@ -129,7 +125,7 @@ mod tests {
     //     let (pair, dist) = Day08::find_closest_pair(&points);
     //
     //     assert_eq!(pair, (1, 5));
-    //     assert_eq!(dist, 3_f32.sqrt());
+    //     assert_eq!(dist, 3_f64.sqrt());
     // }
 
     // #[test]
@@ -169,14 +165,14 @@ mod tests {
     //         (15, [6, 6, 6]),
     //         (16, [7, 7, 7]),
     //     ];
-    //     let result = Day08::find_closest_pair_across(&points_left, &points_right, 100_f32);
+    //     let result = Day08::find_closest_pair_across(&points_left, &points_right, 100_f64);
     //     assert!(result.is_some());
     //     assert_eq!(result.unwrap().0, (12, 13));
     // }
 
     #[test]
     fn test_part_1_sample() {
-        let solver = Day08 {limit: 10};
+        let solver = Day08 { limit: 10 };
         let result = solver.run_part_1(PathBuf::from("tests/day_08/sample.txt"));
         assert_eq!(result, Outcome::U64(40));
     }
