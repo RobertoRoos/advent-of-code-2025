@@ -131,16 +131,16 @@ impl Grid {
         Self::new(0, 0)
     }
 
-    fn range_rows(&self) -> Range<i16> {
+    pub fn range_rows(&self) -> Range<i16> {
         0..self.rows
     }
 
-    fn range_cols(&self) -> Range<i16> {
+    pub fn range_cols(&self) -> Range<i16> {
         0..self.cols
     }
 
     /// Iterable over all coordinates in this grid, left-to-right and then top-to-bottom
-    fn range(&self) -> GridIterator<'_> {
+    pub fn range(&self) -> GridIterator<'_> {
         GridIterator {
             loc: None,
             grid: self,
@@ -167,7 +167,18 @@ impl Grid {
         self.items.remove(&loc);
     }
 
-    fn neighbouring_items(&self, loc: &RowCol) -> impl Iterator<Item = (RowCol, char)> {
+    /// Return the first item with a given symbol
+    pub fn get_item_by_symbol(&self, symbol: char) -> Result<RowCol, String> {
+        for (&loc, &c) in &self.items {
+            if c == symbol {
+                return Ok(loc);
+            }
+        }
+        Err(format!("Failed to find {symbol}"))
+    }
+
+    /// Get neighboring items in the grid to a given position
+    pub fn neighbouring_items(&self, loc: &RowCol) -> impl Iterator<Item = (RowCol, char)> {
         loc.neighbours().filter_map(|n_loc| {
             let item = self.items.get(&n_loc);
             match item {
