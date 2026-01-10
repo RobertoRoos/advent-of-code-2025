@@ -1,5 +1,7 @@
 use crate::shared::{Outcome, Solution};
+use std::cmp::{max, min};
 use std::collections::HashSet;
+use std::hash::Hash;
 use std::io::BufRead;
 use std::path::PathBuf;
 
@@ -37,31 +39,11 @@ impl Solution for Day08 {
 
         // Get the shortest distances:
         for (pair, _dist) in distances.iter().take(self.limit) {
-            let circuit_1_idx = circuits
-                .iter()
-                .enumerate()
-                .find_map(|(idx, set)| {
-                    if set.contains(&pair.0) {
-                        Some(idx)
-                    } else {
-                        None
-                    }
-                })
-                .unwrap();
-            let circuit_2_idx = circuits
-                .iter()
-                .enumerate()
-                .find_map(|(idx, set)| {
-                    if set.contains(&pair.1) {
-                        Some(idx)
-                    } else {
-                        None
-                    }
-                })
-                .unwrap();
+            let idx_1 = Self::find_in_sets(max(&pair.0, &pair.1), &circuits).unwrap();
+            let idx_2 = Self::find_in_sets(min(&pair.0, &pair.1), &circuits).unwrap();
 
-            let moving: Vec<usize> = circuits[circuit_2_idx].drain().collect();
-            circuits[circuit_1_idx].extend(moving);
+            let moving: Vec<usize> = circuits[idx_2].drain().collect();
+            circuits[idx_1].extend(moving);
         }
 
         // Find the largest three circuits to multiply the size of:
@@ -101,6 +83,16 @@ impl Day08 {
             + f64::from(b[1] - a[1]).powi(2)
             + f64::from(b[2] - a[2]).powi(2))
         .sqrt()
+    }
+
+    /// Find the index of the first hashset that contains the needle
+    fn find_in_sets<T: Eq + Hash>(needle: &T, haystack: &[HashSet<T>]) -> Option<usize> {
+        for (i, set) in haystack.iter().enumerate() {
+            if set.contains(needle) {
+                return Some(i);
+            }
+        }
+        None
     }
 }
 
