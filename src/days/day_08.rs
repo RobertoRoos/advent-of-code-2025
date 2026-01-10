@@ -39,7 +39,8 @@ impl Solution for Day08 {
             if circuits.len() == 1 {
                 // Everything just became a single circuit!
                 return Outcome::U64(
-                    u64::try_from(junctions[pair.0][0] * junctions[pair.1][0]).unwrap(),
+                    u64::try_from(junctions[pair.0][0]).unwrap()
+                        * u64::try_from(junctions[pair.1][0]).unwrap(),
                 );
             }
         }
