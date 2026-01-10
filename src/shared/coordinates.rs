@@ -72,9 +72,7 @@ impl From<&str> for RowCol {
     fn from(line: &str) -> Self {
         let mut it = line.split(',');
 
-        let part_to_num = |txt: Option<&str>| {
-            txt.unwrap().parse::<I>().unwrap()
-        };
+        let part_to_num = |txt: Option<&str>| txt.unwrap().parse::<I>().unwrap();
 
         Self {
             row: part_to_num(it.next()),
