@@ -30,19 +30,21 @@ static DIRECTIONS: [Direction; 4] = [
     Direction::Left,
 ];
 
+type I = i32;
+
 /// 2D coordinate through row and column
 ///
 /// (0,0) is always the top-left.
 #[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 pub struct RowCol {
-    pub row: i16,
-    pub col: i16,
+    pub row: I,
+    pub col: I,
     // `row` and `col` can only be positive, but making them signed integers prevents
     // doing a lot of casting.
 }
 
 impl RowCol {
-    pub fn new(row: i16, col: i16) -> Self {
+    pub fn new(row: I, col: I) -> Self {
         Self { row, col }
     }
 
@@ -63,6 +65,21 @@ impl RowCol {
     /// Loop over the 4 neighboring locations
     pub fn neighbours(&self) -> impl Iterator<Item = RowCol> {
         DIRECTIONS.iter().map(|dir| self.step(dir))
+    }
+}
+
+impl From<&str> for RowCol {
+    fn from(line: &str) -> Self {
+        let mut it = line.split(',');
+
+        let part_to_num = |txt: Option<&str>| {
+            txt.unwrap().parse::<I>().unwrap()
+        };
+
+        Self {
+            row: part_to_num(it.next()),
+            col: part_to_num(it.next()),
+        }
     }
 }
 
@@ -112,14 +129,14 @@ impl Iterator for GridIterator<'_> {
 /// Range of rows and columns in 2D, with or without items
 #[derive(Debug)]
 pub struct Grid {
-    pub rows: i16,
-    pub cols: i16,
+    pub rows: i32,
+    pub cols: i32,
     pub items: HashMap<RowCol, char>, // Grid items are marked only with a single character
 }
 
 #[allow(dead_code)]
 impl Grid {
-    pub fn new(rows: i16, cols: i16) -> Self {
+    pub fn new(rows: I, cols: I) -> Self {
         Self {
             rows,
             cols,
@@ -131,11 +148,11 @@ impl Grid {
         Self::new(0, 0)
     }
 
-    pub fn range_rows(&self) -> Range<i16> {
+    pub fn range_rows(&self) -> Range<I> {
         0..self.rows
     }
 
-    pub fn range_cols(&self) -> Range<i16> {
+    pub fn range_cols(&self) -> Range<I> {
         0..self.cols
     }
 
@@ -148,7 +165,7 @@ impl Grid {
     }
 
     /// Insert a new item into the grid
-    fn add_item(&mut self, loc: RowCol, symbol: char) {
+    pub fn add_item(&mut self, loc: RowCol, symbol: char) {
         assert!(
             !self.items.contains_key(&loc),
             "Item {loc} is already filled in the grid"
@@ -193,7 +210,7 @@ impl Grid {
         let row = self.rows;
         self.rows += 1;
         for (col, symbol) in line.chars().enumerate() {
-            let col: i16 = col.try_into().unwrap();
+            let col: I = col.try_into().unwrap();
             if col >= self.cols {
                 self.cols += 1; // Also expand the column range for white-space
             }

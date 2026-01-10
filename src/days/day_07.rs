@@ -26,11 +26,11 @@ impl Day07 {
         let mut splits = 0;
 
         // Keep a set of laser beam x-positions together with how many paths lead there, so far
-        let mut tips: HashMap<i16, u64> = HashMap::from([(loc_start.col, 1)]);
+        let mut tips: HashMap<i32, u64> = HashMap::from([(loc_start.col, 1)]);
 
         // Walk through the next rows in the grid:
         for row in (loc_start.row + 1)..grid.rows {
-            let mut next_tips: HashMap<i16, u64> = HashMap::new();
+            let mut next_tips: HashMap<i32, u64> = HashMap::new();
 
             for (tip_col, path_count) in tips {
                 let next = RowCol::new(row, tip_col);
